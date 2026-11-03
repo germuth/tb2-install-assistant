@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TB2 Spray Layout Installation Assistant | 10x8</title>
+  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧗</text></svg>">
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-badge">TB2 SPRAY</div>
+      <div>
+        <div class="brand-title">Tension Board 2 Install Assistant</div>
+        <div class="brand-sub">10x8 Spray Layout • 267 Total Holds (137 Plastic + 130 Wood)</div>
+      </div>
+    </div>
+
+    <!-- Center Progress Bar -->
+    <div class="header-center">
+      <div class="progress-container">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-bar-fill"></div>
+        </div>
+        <div class="progress-labels">
+          <span id="progress-count">0 / 267 holds installed</span>
+          <span id="progress-pct" style="font-weight: 700; color: #22c55e;">0%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Controls -->
+    <div class="header-actions">
+      <button class="btn-icon" id="btn-sound-toggle" title="Toggle audio chime on install">
+        🔊 Sound
+      </button>
+      <div style="display: flex; gap: 4px; background: var(--bg-elevated); padding: 2px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+        <button class="btn-icon" style="padding: 4px 8px; font-size: 11px; border: none; background: transparent;" onclick="openOverviewModal('cad')" title="View full 10x8 CAD diagram">
+          📐 CAD
+        </button>
+        <button class="btn-icon" style="padding: 4px 8px; font-size: 11px; border: none; background: transparent;" onclick="openOverviewModal('render')" title="View official 5000px 3D shop render">
+          🎨 3D Render
+        </button>
+        <button class="btn-icon" style="padding: 4px 8px; font-size: 11px; border: none; background: transparent;" onclick="openOverviewModal('real')" title="View real installed gym board photo">
+          📸 Real Board
+        </button>
+        <button class="btn-icon" style="padding: 4px 8px; font-size: 11px; border: none; background: transparent;" onclick="openOverviewModal('compass')" title="View official 16-point compass direction diagram">
+          🧭 Compass
+        </button>
+      </div>
+      <button class="btn-icon" onclick="openTipsModal()" title="Installation Tips & Video Guide">
+        💡 Tips
+      </button>
+      <button class="btn-icon" onclick="resetProgress()" title="Reset progress" style="color: #ef4444;">
+        ↺ Reset
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter & Mode Bar -->
+  <div style="max-width: 1600px; width: 100%; margin: 12px auto 0; padding: 0 20px;">
+    <div class="mode-bar">
+      <!-- Order / Sort Mode -->
+      <div class="mode-selector">
+        <span class="mode-label">Install Sequence:</span>
+        <select class="mode-select" id="mode-select">
+          <option value="guided">★ Guided Mode (Plastic First Bottom-Up → Wood Bottom-Up)</option>
+          <option value="screws">🔩 Screw Groups (1 5/8" Footholds → 2 1/2" Standard → 4" Deep)</option>
+          <option value="set">📦 Hold Set / Bag Mode (Alphabetical by Hold ID)</option>
+          <option value="row">↕ Row-by-Row (Bottom Row 1 up to Row 15)</option>
+        </select>
+      </div>
+
+      <!-- Material & Box Filters -->
+      <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+        <span class="mode-label">Filter:</span>
+        <button class="view-tab filter-btn active" data-material="all" id="tab-all">All (267)</button>
+        <button class="view-tab filter-btn" data-material="Plastic" id="tab-plastic">Plastic (137)</button>
+        <button class="view-tab filter-btn" data-material="Box1" id="tab-box1" title="Filter to holds you tagged in Plastic Box 1">📦 Box 1 (0)</button>
+        <button class="view-tab filter-btn" data-material="Box2" id="tab-box2" title="Remaining plastic holds in unopened Plastic Box 2">📦 Box 2 (137)</button>
+        <button class="btn-icon" style="padding: 5px 9px; font-size: 12px;" onclick="openBoxModal()" title="Tag which hold bags arrived in Plastic Box 1">⚙️ Tag Box 1</button>
+        <button class="view-tab filter-btn" data-material="Wood" id="tab-wood">Wood (130)</button>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="search-input" placeholder="Hold ID, A1..K15, or Col,Row (46R, DE 12.5, -1.5,12.5) [/]" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Grid Area -->
+  <main>
+    <!-- Left Column: The Big Step-by-Step Hold Card -->
+    <section class="card-column">
+      <div id="hold-card" class="hold-card">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+
+      <!-- Fastener Inventory Remaining -->
+      <div class="inventory-card">
+        <div class="inventory-header">
+          <span>Remaining Fasteners To Install</span>
+          <span style="font-weight: 500; font-size: 11px;">Updated in real time</span>
+        </div>
+        <div class="inventory-grid">
+          <div class="inventory-item">
+            <span class="inventory-label" style="color: var(--color-screw-short);">1 5/8" Screws</span>
+            <span class="inventory-val" id="inv-short">-</span>
+          </div>
+          <div class="inventory-item">
+            <span class="inventory-label" style="color: var(--color-screw-mid);">2 1/2" Screws</span>
+            <span class="inventory-val" id="inv-mid">-</span>
+          </div>
+          <div class="inventory-item">
+            <span class="inventory-label" style="color: var(--color-screw-long);">4" Screws</span>
+            <span class="inventory-val" id="inv-long">-</span>
+          </div>
+          <div class="inventory-item">
+            <span class="inventory-label" style="color: var(--text-muted);">Total Screws</span>
+            <span class="inventory-val" id="inv-total">-</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Interactive Board Map & Stats -->
+    <section class="board-column">
+      <!-- Quick Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-name">Active Queue</div>
+          <div class="stat-value" id="stat-current">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-name">Plastic Installed</div>
+          <div class="stat-value" id="stat-plastic" style="color: var(--color-plastic);">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-name">Wood Installed</div>
+          <div class="stat-value" id="stat-wood" style="color: var(--color-wood);">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-name">Total Progress</div>
+          <div class="stat-value" id="stat-pct" style="color: #22c55e;">0%</div>
+        </div>
+      </div>
+
+      <!-- Interactive 10x8 SVG Board Map -->
+      <div class="board-card">
+        <div class="board-card-header">
+          <div class="board-title">
+            <span>Interactive 10x8 Wall Map</span>
+            <span style="font-size: 11px; color: var(--text-muted); font-weight: normal;">(Click any hole to inspect)</span>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><span class="legend-dot current"></span> Active</div>
+            <div class="legend-item"><span class="legend-dot installed"></span> Installed</div>
+            <div class="legend-item"><span class="legend-dot plastic"></span> Plastic</div>
+            <div class="legend-item"><span class="legend-dot wood"></span> Wood</div>
+          </div>
+        </div>
+
+        <div class="svg-board-wrapper">
+          <svg id="board-svg" viewBox="0 0 800 1000"></svg>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Tooltip on SVG hover -->
+  <div id="board-tooltip"></div>
+
+  <!-- Image Zoom Modal -->
+  <div class="modal-overlay" id="image-modal" style="display: none;" onclick="closeModals()">
+    <div class="modal-content image-modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModals()">&times;</button>
+      <h3 id="image-modal-caption" style="margin-bottom: 12px; font-size: 16px;">Hold Preview</h3>
+      <img id="image-modal-img" class="image-modal-img" src="" alt="Hold Zoom Preview" />
+    </div>
+  </div>
+
+  <!-- Installation Tips Modal -->
+  <div class="modal-overlay" id="tips-modal" style="display: none;" onclick="closeModals()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModals()">&times;</button>
+      <h2 style="font-size: 20px; font-weight: 800; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+        🧗 Tension Board 2 Installation Tips & Tricks
+      </h2>
+      
+      <div style="font-size: 14px; line-height: 1.6; display: flex; flex-direction: column; gap: 14px; color: #d1d5db;">
+        <div>
+          <strong style="color: var(--color-plastic);">1. Order of Operations: Plastic First ("Set-by-Set" / Bag-by-Bag), Then Wood</strong>
+          <p style="color: var(--text-muted); font-size: 13px;">
+            Install all 137 plastic holds first—their distinct shapes act as landmarks for placing the 130 wood holds. In Tension's manual, <em>"set-by-set"</em> refers to board crop sets (10x8 Base vs. 12x8/12x12 Expansion boxes). Since <strong>10x8 is the base crop</strong>, every hold in your plastic boxes belongs on your wall (split across 2 boxes for shipping weight, grouped in inner bags). You can either follow <strong>Guided Mode</strong> bottom-up, or open one bag at a time and press <code class="hotkey-badge">/</code> to type the stamped Hold ID.
+          </p>
+        </div>
+
+        <div>
+          <strong style="color: var(--color-wood);">2. Wood Hold Orientation Rule</strong>
+          <p style="color: var(--text-muted); font-size: 13px;">
+            Wood holds have an orientation arrow/SKU stamped directly on the hold. The arrow is oriented <strong>perpendicular to the screw holes</strong>, NOT aligned with the usable grip surface. Always orient the stamped arrow toward the nautical direction indicated in the app.
+          </p>
+        </div>
+
+        <div>
+          <strong style="color: #38bdf8;">3. Official 16-Point Nautical Compass Guide</strong>
+          <p style="color: var(--text-muted); font-size: 13px;">
+            Directions like <em>E/SE (ESE)</em> or <em>W/SW (WSW)</em> sit halfway (22.5°) between the cardinal and 45° diagonal lines. Align the hold's molded/stamped reference arrow from the center hole toward that compass heading:
+          </p>
+          <img src="compass_reference.png" alt="Official Tension Compass Guide" style="max-width: 340px; width: 100%; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; cursor: pointer;" onclick="openOverviewModal('compass')" />
+        </div>
+
+        <div>
+          <strong style="color: #f43f5e;">4. Impact Driver Torque Clutch</strong>
+          <p style="color: var(--text-muted); font-size: 13px;">
+            Adjust the torque/speed clutch on your impact driver. Drive screws until the hold is completely flush with no rocking. Do NOT over-torque, which can crack wood holds or countersink too deep.
+          </p>
+        </div>
+
+        <div>
+          <strong style="color: var(--text-main);">5. Keyboard Shortcuts for Hands-Free Speed</strong>
+          <ul style="margin-left: 20px; font-size: 13px; color: var(--text-muted); margin-top: 4px;">
+            <li><code class="hotkey-badge">Space</code> / <code class="hotkey-badge">Enter</code>: Drill in & mark installed (advances to next hold)</li>
+            <li><code class="hotkey-badge">Right Arrow</code>: Skip to next hold</li>
+            <li><code class="hotkey-badge">Left Arrow</code>: Go back to previous hold</li>
+            <li><code class="hotkey-badge">U</code>: Undo / toggle installed status</li>
+            <li><code class="hotkey-badge">/</code> or <code class="hotkey-badge">F</code>: Focus hold search box</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Plastic Box 1 / Box 2 Quick Tagger Modal -->
+  <div class="modal-overlay" id="box-modal" style="display: none;" onclick="closeModals()">
+    <div class="modal-content" style="max-width: 780px; width: 95%;" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModals()">&times;</button>
+      <h2 style="font-size: 19px; font-weight: 800; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+        📦 Split Plastic Holds: Box 1 vs. Box 2
+      </h2>
+      <p style="font-size: 13px; color: var(--text-muted); margin-top: 8px; line-height: 1.5;">
+        Tension packs the 10×8 Plastic set into 2 cartons by weight without a fixed public Box 1 vs. Box 2 manifest (holds are grouped inside clear inner bags by ID / L+R pairs). Open <strong>Box 1</strong>, tap or type the Hold IDs on its bags below, and keep <strong>Box 2</strong> sealed—everything untagged automatically stays in <strong>Box 2</strong>!
+      </p>
+
+      <div style="display: flex; gap: 10px; align-items: center; margin-top: 12px; flex-wrap: wrap;">
+        <input type="text" id="box-quick-input" class="search-input" style="width: 300px; padding-left: 12px;" placeholder="Quick-type bag ID + Enter (e.g. 46 adds 46L+46R, 61S)..." />
+        <span id="box-split-summary" style="font-size: 13px; font-weight: 700; color: #38bdf8; font-family: var(--font-mono);">Box 1: 0 holds • Box 2: 137 holds</span>
+        <button class="btn-icon" style="margin-left: auto; font-size: 12px; color: #ef4444;" onclick="clearBox1Selection()">Clear Box 1</button>
+      </div>
+
+      <div id="box-chips-grid" class="box-chips-grid"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px;">
+        <button class="btn-secondary" onclick="closeModals()">Close</button>
+        <button class="btn-primary" style="padding: 8px 18px; font-size: 14px;" onclick="applyBox1FilterAndClose()">✓ Save & Iterate Box 1 Only</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=7"></script>
+</body>
+</html>
